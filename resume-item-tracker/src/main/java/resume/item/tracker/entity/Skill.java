@@ -24,11 +24,10 @@ public class Skill {//generates the customer table with the columns listed
 	
 	private String skillName; 
 	private String skillLevel; 
-	private String customerEmail;
 	
 	@EqualsAndHashCode.Exclude //prevents recursion when .equals() and .hashCode() methods are called
 	@ToString.Exclude //prevents recursion when .toString() is called 
-	@ManyToMany(mappedBy = "skill", cascade = CascadeType.PERSIST)//creates the many to many relationship between skill and job 
+	@ManyToMany(mappedBy = "skills", cascade = CascadeType.PERSIST)//creates the many to many relationship between skill and job 
 	private Set<Job> jobs = new HashSet<>();
 	
 }

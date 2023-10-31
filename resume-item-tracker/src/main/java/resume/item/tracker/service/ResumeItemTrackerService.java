@@ -17,6 +17,8 @@ import resume.item.tracker.entity.Reference;
 import resume.item.tracker.dao.SkillDao;
 import resume.item.tracker.dao.ReferenceDao;
 import resume.item.tracker.controller.model.JobData;
+import resume.item.tracker.controller.model.JobData.JobReference;
+import resume.item.tracker.controller.model.JobData.JobSkill;
 //import resume.item.tracker.controller.model.ResumeItemTrackerData.PetStoreCustomer;
 //import resume.item.tracker.controller.model.ResumeItemTrackerData.PetStoreEmployee;
 import resume.item.tracker.dao.JobDao;
@@ -68,51 +70,103 @@ public class ResumeItemTrackerService {
 				.orElseThrow(() -> new NoSuchElementException("Job with ID=" + jobId + " was not found."));
 	}
 
-//	@Transactional(readOnly = false)
-//	public PetStoreEmployee saveEmployee(Long petStoreId, PetStoreEmployee petStoreEmployee) { //saves the newly added employee to the database 
-//		PetStore petStore = findPetStoreById(petStoreId);
-//		Long employeeId = petStoreEmployee.getEmployeeId();
-//		Employee employee = findOrCreateEmployee(employeeId, petStoreId);
-//	
-//		copyEmployeeFields(employee, petStoreEmployee);
-//		employee.setPetStore(petStore);
-//		
-//		Set<Employee> employeeSet = petStore.getEmployees();
-//		employeeSet.add(employee); //adds the employee to the petStore employee set 
-//		petStore.setEmployees(employeeSet); //sets this new set to the petStore employee set 
-//		
-//		Employee dbEmployee = employeeDao.save(employee);
-//		return new PetStoreEmployee(dbEmployee); 
-//		
-//	}
-//
-//	private Employee findOrCreateEmployee(Long employeeId, Long petStoreId) {//finds an employee or creates one if that employeeIid does not excist 
-//		if (Objects.isNull(employeeId)) {
-//			Employee employee = new Employee();
-//			return employee;
-//			//returns new Employee if employeeId is null
-//		} else {
-//			return findEmployeeById(petStoreId, employeeId);
-//		}
-//	}
-//	
-//	private Employee findEmployeeById(Long petStoreId, Long employeeId) {//finds an employee by their employeeId
-//		Employee employee = employeeDao.findById(employeeId).orElseThrow(() -> new NoSuchElementException("Employee with ID=" + employeeId +" was not found."));
-//		if (employee.getPetStore().getPetStoreId() == petStoreId) {
-//			return employee;
-//		} else {
-//			throw new IllegalArgumentException("This employee does not belong to the pet store with a pet store ID=" + petStoreId);
-//		}
-//	}
-//	
-//	private void copyEmployeeFields(Employee employee, PetStoreEmployee petStoreEmployee) {//copies employee fields to a PetStoreEmployee object 
-//		employee.setEmployeeFirstName(petStoreEmployee.getEmployeeFirstName());
-//		employee.setEmployeeLastName(petStoreEmployee.getEmployeeLastName());
-//		employee.setEmployeePhone(petStoreEmployee.getEmployeePhone());
-//		employee.setEmployeeTitle(petStoreEmployee.getEmployeeTitle());
-//		employee.setEmployeeId(petStoreEmployee.getEmployeeId());
-//	}
-//	
+	@Transactional(readOnly = false)
+	public JobSkill saveSkill(Long jobId, JobSkill jobSkill) {
+		Job job = findJobById(jobId);
+		Long skillId = jobSkill.getSkillId();
+		Skill skill = findOrCreateSkill(skillId, jobId);
+		
+		copySkillFields(skill, jobSkill); 
+		
+		Set<Job> jobSet = skill.getJobs(); 
+		jobSet.add(job); 
+		skill.setJobs(jobSet); //adds the job to the skill's job set 
+		
+		Set<Skill> skillSet = job.getSkills(); 
+		skillSet.add(skill);
+		job.setSkills(skillSet); //adds the skill to the job's skill set 
+		
+		Skill dbSkill = skillDao.save(skill); 
+				
+		return new JobSkill(dbSkill);
+	}
+	
+	private Skill findOrCreateSkill(Long skillId, Long jobId) {//finds a skill by their skillId or creates a new skill if it doesn't already exist 
+		if (Objects.isNull(skillId)) {
+			Skill skill = new Skill();
+			return skill;
+			//returns new Skill if skillId is null
+		} else {
+			return findSkillById(skillId, jobId);
+		}
+	}
+	
+	private Skill findSkillById(Long skillId, Long jobId) {//finds a skill by its skillId 
+		Skill skill = skillDao.findById(skillId).orElseThrow(() -> new NoSuchElementException("Skill with ID=" + skillId +" was not found."));
+		boolean found = false; 
+		
+		for(Job jobIdentified : skill.getJobs()) {
+			if(jobIdentified.getJobId() == jobId) {
+				found = true; 
+				break;
+			}
+		}
+		if(!found) { 
+			throw new IllegalArgumentException("This skill does not exist.");
+		}
+		return skill;
+	}
+
+	
+	private void copySkillFields(Skill skill, JobSkill jobSkill) {//sets the values of the Skill to a JobSkill object 
+		skill.setSkillName(jobSkill.getSkillName());
+		skill.setSkillLevel(jobSkill.getSkillLevel());
+		skill.setSkillId(jobSkill.getSkillId());
+	}
+
+	@Transactional(readOnly = false)
+	public JobReference saveReference(Long jobId, JobReference jobReference) { //saves the newly added reference to the database 
+		Job job = findJobById(jobId);
+		Long referenceId = jobReference.getReferenceId();
+		Reference reference = findOrCreateReference(referenceId, jobId);
+	
+		copyReferenceFields(reference, jobReference);
+		reference.setJob(job);
+		
+		Set<Reference> referenceSet = job.getReferences();
+		referenceSet.add(reference); //adds the reference to the job reference set 
+		job.setReferences(referenceSet); //sets this new set to the job reference set 
+		
+		Reference dbReference = referenceDao.save(reference);
+		return new JobReference(dbReference); 
+	}
+
+	private Reference findOrCreateReference(Long referenceId, Long jobId) {//finds a reference or creates one if that referenceId does not exist 
+		if (Objects.isNull(referenceId)) {
+			Reference reference = new Reference();
+			return reference;
+			//returns new Reference if referenceId is null
+		} else {
+			return findReferenceById(jobId, referenceId);
+		}
+	}
+	
+	private Reference findReferenceById(Long jobId, Long referenceId) {//finds a reference by their referenceId
+		Reference reference = referenceDao.findById(referenceId).orElseThrow(() -> new NoSuchElementException("Reference with ID=" + referenceId +" was not found."));
+		if (reference.getJob().getJobId() == jobId) {
+			return reference;
+		} else {
+			throw new IllegalArgumentException("This reference does not belong to the job with a job ID=" + referenceId);
+		}
+	}
+	
+	private void copyReferenceFields(Reference reference, JobReference jobReference) {//copies reference fields to a JobReference object 
+		reference.setReferenceId(jobReference.getReferenceId());
+		reference.setReferenceName(jobReference.getReferenceName());
+		reference.setReferencePhoneNumber(jobReference.getReferencePhoneNumber());
+		reference.setReferenceEmail(jobReference.getReferenceEmail());
+	}
+	
 //	@Transactional(readOnly = false)
 //	public PetStoreCustomer saveCustomer(Long petStoreId, PetStoreCustomer petStoreCustomer) {//saves the newly created customer to the database 
 //		PetStore petStore = findPetStoreById(petStoreId);
@@ -134,38 +188,7 @@ public class ResumeItemTrackerService {
 //		
 //	}
 //
-//	private Customer findOrCreateCustomer(Long customerId, Long petStoreId) {//finds a customer by their customerId or creates a new customer if they don't already exist 
-//		if (Objects.isNull(customerId)) {
-//			Customer customer = new Customer();
-//			return customer;
-//			//returns new Customer if customerId is null
-//		} else {
-//			return findCustomerById(petStoreId, customerId);
-//		}
-//	}
-//	
-//	private Customer findCustomerById(Long petStoreId, Long customerId) {//finds a customer by their customerId 
-//		Customer customer = customerDao.findById(customerId).orElseThrow(() -> new NoSuchElementException("Customer with ID=" + customerId +" was not found."));
-//		int count = 0;
-//		for(PetStore petStoreIdentified : customer.getPetStores()) {
-//			if(petStoreIdentified.getPetStoreId() == petStoreId) {
-//				return customer;
-//			}else {
-//				count++;
-//			}
-//		}
-//		if(count > petStoreId.MAX_VALUE) {//tests to see if the count is greater than the maximum value of the petStoreId. This will tell us if the previous enhanced for loop ran all the way through the set without finding a matching pet store. 
-//			throw new IllegalArgumentException("This customer does not shop at a pet store.");
-//		}
-//		return null;
-//	}
-//	
-//	private void copyCustomerFields(Customer customer, PetStoreCustomer petStoreCustomer) {//sets the values of the customer to a PetStoreCustomer object 
-//		customer.setCustomerId(petStoreCustomer.getCustomerId());
-//		customer.setCustomerFirstName(petStoreCustomer.getCustomerFirstName());
-//		customer.setCustomerLastName(petStoreCustomer.getCustomerLastName());
-//		customer.setCustomerEmail(petStoreCustomer.getCustomerEmail());
-//	}
+
 //
 //	@Transactional(readOnly = false)
 //	public List<PetStoreData> retrieveAllPetStores() { //uses findAll from the PetStoreDao class to retrieve all pet stores without their customer and employee data 

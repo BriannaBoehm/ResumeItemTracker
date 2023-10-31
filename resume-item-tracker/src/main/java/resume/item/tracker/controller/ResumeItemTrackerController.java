@@ -36,14 +36,42 @@ public class ResumeItemTrackerController {
 		log.info("Creating job!");
 		return resumeItemTrackerService.saveJob(jobData); //calls on savevJob method from ResumeItemTrackerService to save the post info to the database 
 	}
-//	
-//	@PutMapping("/pet_store/{petStoreId}") //maps put verbs with url values that end in /pet_store/{petStoreId} to this method 
-//	public JobData modifyPetStore(@PathVariable Long petStoreId, @RequestBody JobData petStoreData) {
-//		petStoreData.setPetStoreId(petStoreId);
-//		log.info("Modifying pet store.");
-//		return petStoreService.savePetStore(petStoreData); //calls on savePetStore method from PetStoreService to save the post info to the database
-//	}
-//	
+	
+	@PostMapping("/{jobId}/skill") //maps post verbs with url values that end in /{jobId}/skill to this method 
+	@ResponseStatus(code = HttpStatus.CREATED)
+	public JobSkill insertSkill (@RequestBody JobSkill jobSkill, @PathVariable Long jobId) {
+		log.info("Creating skill!");
+		return resumeItemTrackerService.saveSkill(jobId, jobSkill);
+	}
+	
+	@PostMapping("/{jobId}/reference")
+	@ResponseStatus(code = HttpStatus.CREATED)
+	public JobReference insertReference (@RequestBody JobReference jobReference, @PathVariable Long jobId) {
+		log.info("Creating reference.");
+		return resumeItemTrackerService.saveReference(jobId, jobReference);
+	}
+	
+	@PutMapping("/job/{jobId}") //maps put verbs with url values that end in /job/{jobId} to this method 
+	public JobData modifyJob(@PathVariable Long jobId, @RequestBody JobData jobData) {
+		jobData.setJobId(jobId);
+		log.info("Modifying job.");
+		return resumeItemTrackerService.saveJob(jobData); //calls on saveJob method from ResumeItemTrackerService to save the post info to the database
+	}
+	
+	@PutMapping("/{jobId}/skill/{skillId}") //maps put verbs with url values that end in /{jobId}/skill/{skillId} to this method 
+	public JobSkill modifySkill(@PathVariable Long skillId, @PathVariable Long jobId, @RequestBody JobSkill jobSkill) {
+		jobSkill.setSkillId(skillId);
+		log.info("Modifying skill.");
+		return resumeItemTrackerService.saveSkill(jobId, jobSkill); //calls on saveSkill method from ResumeItemTrackerService to save the post info to the database
+	}
+	
+	@PutMapping("/{jobId}/reference/{referenceId}") //maps put verbs with url values that end in /{jobId}/reference/{referenceId} to this method 
+	public JobReference modifyReference(@PathVariable Long referenceId, @PathVariable Long jobId, @RequestBody JobReference jobReference) {
+		jobReference.setReferenceId(referenceId);
+		log.info("Modifying reference.");
+		return resumeItemTrackerService.saveReference(jobId, jobReference); //calls on saveReference method from ResumeItemTrackerService to save the post info to the database
+	}
+	
 //	@PostMapping("/{petStoreId}/employee") //maps the post verbs with url values that end in /pet_store/{petStoreId}/employee to this method 
 //	@ResponseStatus(code = HttpStatus.CREATED)
 //	public PetStoreEmployee insertEmployee (@PathVariable Long petStoreId, @RequestBody PetStoreEmployee petStoreEmployee) {
