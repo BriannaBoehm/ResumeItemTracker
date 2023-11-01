@@ -167,56 +167,51 @@ public class ResumeItemTrackerService {
 		reference.setReferenceEmail(jobReference.getReferenceEmail());
 	}
 	
-//	@Transactional(readOnly = false)
-//	public PetStoreCustomer saveCustomer(Long petStoreId, PetStoreCustomer petStoreCustomer) {//saves the newly created customer to the database 
-//		PetStore petStore = findPetStoreById(petStoreId);
-//		Long customerId = petStoreCustomer.getCustomerId();
-//		Customer customer = findOrCreateCustomer(customerId, petStoreId);
-//	
-//		copyCustomerFields(customer, petStoreCustomer);
-//		
-//		Set<PetStore> petStoreSet = customer.getPetStores();
-//		petStoreSet.add(petStore); //adds the pet store to the customer petStore set 
-//		customer.setPetStores(petStoreSet); //sets this new set to the petStore customer set 
-//		
-//		Set<Customer> customerSet = petStore.getCustomers();
-//		customerSet.add(customer); //adds the customer to the petStore customer set 
-//		petStore.setCustomers(customerSet); //sets this new set to the petStore customer set 
-//		
-//		Customer dbCustomer = customerDao.save(customer);
-//		return new PetStoreCustomer(dbCustomer); 
-//		
-//	}
-//
+	public Map<String, String> deleteReferenceById(Long jobId, Long referenceId) {//deletes a reference by their referenceId and associated jobId and returns a message that it was deleted 
+		Reference ref = findReferenceById(jobId, referenceId);
+		referenceDao.delete(ref);
+		Map<String,String> map = new HashMap<String,String>();
+		map.put("message","Reference with ID=" + referenceId + " was successfully deleted.");
+		return map;
+	}
 
-//
-//	@Transactional(readOnly = false)
-//	public List<PetStoreData> retrieveAllPetStores() { //uses findAll from the PetStoreDao class to retrieve all pet stores without their customer and employee data 
-//		List<PetStore> petStores = petStoreDao.findAll();
-//		List<PetStoreData> result = new LinkedList<>();
-//		for(PetStore petStore : petStores) {
-//			
-//			PetStoreData petStoreData = new PetStoreData(petStore); 
-//			petStoreData.getPetStoreCustomer().clear(); 
-//			petStoreData.getPetStoreEmployee().clear();
-//			
-//			result.add(petStoreData);
-//		}
-//		return result;
-//	}
-//
-//	@Transactional(readOnly = false)
-//	public PetStoreData getPetStoreById(Long petStoreId) {//returns the pet store data of one pet store 
-//		PetStore ps = findPetStoreById(petStoreId);
-//		PetStoreData psd = new PetStoreData(ps);
-//		return psd;
-//	}
-//
-//	public Map<String, String> deletePetStoreById(Long petStoreId) {//deletes a pet store by their petStoreId and returns a message that it was deleted 
-//		PetStore ps = findPetStoreById(petStoreId);
-//		petStoreDao.delete(ps);
-//		Map<String,String> map = new HashMap<String,String>();
-//		map.put("message","Pet store with ID=" + petStoreId + " was successfully deleted.");
-//		return null;
-//	}
+	@Transactional(readOnly = false)
+	public List<JobData> retrieveAllJobs() { //uses findAll from the JobDao class to retrieve all jobs without their skill and reference data 
+		List<Job> jobs = jobDao.findAll();
+		List<JobData> result = new LinkedList<>();
+		for(Job job : jobs) {
+			
+			JobData jobData = new JobData(job); 
+			jobData.getJobSkill().clear(); 
+			jobData.getJobReference().clear();
+			
+			result.add(jobData);
+		}
+		return result;
+	}
+	
+	@Transactional(readOnly = false)
+	public List<JobSkill> retrieveAllSkills() { //uses findAll from the SkillDao class to retrieve all skills 
+		List<Skill> skills = skillDao.findAll();
+		List<JobSkill> result = new LinkedList<>();
+		for(Skill skill : skills) {
+			
+			JobSkill jobSkill = new JobSkill(skill); 
+			result.add(jobSkill);
+		}
+		return result;
+	}
+	
+	@Transactional(readOnly = false)
+	public List<JobReference> retrieveAllReferences() { //uses findAll from the SkillDao class to retrieve all skills 
+		List<Reference> references = referenceDao.findAll();
+		List<JobReference> result = new LinkedList<>();
+		for(Reference reference : references) {
+			
+			JobReference jobReference = new JobReference(reference); 
+			result.add(jobReference);
+		}
+		return result;
+	}
+	
 }

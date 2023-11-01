@@ -30,7 +30,6 @@ public class Job {//generates the pet store table with the columns listed
 	private String jobStartDate; 
 	private String jobEndDate; 
 
-	//UPDATE vv
 	@EqualsAndHashCode.Exclude //prevents recursion when .equals() and .hashCode() methods are called
 	@ToString.Exclude //prevents recursion when .toString() is called 
 	@ManyToMany(cascade = CascadeType.PERSIST)
